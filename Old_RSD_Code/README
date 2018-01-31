@@ -1,0 +1,39 @@
+This is a script that does the linear RSD computation. The input file for a galaxy survey is 
+the same as for the BAO input files for the FoMSWG codes (see the ../Old_FoMSWG_Codes/ 
+directory). It is still based on the WMAP 5-year cosmology; I need to update this before it 
+gets used for the forecasting effort (hence the inclusion of 'Old' in the directory).
+
+An example of how to use this is:
+
+perl driver-rsd.pl < ../Old_FoMSWG_Codes/TEST/ref_bao.in
+
+The BAO input files are of the form
+
+38 0.04848 0.001
+1.000   0.025   1.500   8.68E-04        0.500
+...
+2.850   0.028   2.425   4.08E-06        0.500
+
+The format is:
+
+First line: # z bins; fsky; sigma(z)/(1+z)
+
+Each following line is for one z bin (so in this example there should be 38 following bins). The
+format is: redshift z; full bin width delta z = zmax-zmin; galaxy bias b; number density n (in
+Mpc^-3, **no h**); and reconstruction floor (usually 0.5, set to 1.0 to turn off reconstruction).
+[Note that the actual amount of reconstruction is set by combining the floor with the linear theory
+prediction for how well the displacements can be determined given the level of shot noise in the
+data.]
+
+The script prints to the screen:
+
+1.000	0.025	1.500	8.68E-04	0.07976
+...
+2.850	0.028	2.425	4.08E-06	1.07094
+#  6070.1
+
+where the last column is sigma(f*sigma8)/(f*sigma8). In its present form this goes to kmax = 
+0.2h/Mpc, with FoG length marginalization, fixed background cosmology, and no multi-tracer 
+capability. The final number (6070.1) is the aggregate inverse variance on f*sigma_8.
+
+The WMAP5 power spectrum used in this script was computed by CLASS (Blas et al. 2011).
