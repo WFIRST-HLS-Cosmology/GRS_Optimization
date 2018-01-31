@@ -1,0 +1,74 @@
+=== Introduction ===
+
+This directory contains some old codes from the 2008 FoMSWG (which actually trace back to the ADEPT 
+study from ~2006). These have been maintained by C. Hirata but some pieces have not been kept 
+up-to-date and I haven't attempted to document this (I keep thinking the code will be obsolete 
+before I get around to this!); please ask before using what looks like a feature.
+
+You should run make test to create the executables wl-fisher.x and bao-fisher.x. The settings in 
+test.c right now have the systematics turned off, but we can run cases with selected systematics 
+turned on by varying the flags used in the main function to call the Fisher routines, and in some 
+cases by modifying the input files. (You will get some unused variable warnings.)
+
+The recommended 'first test cases' are
+
+./bao-fisher.x TEST/ref_bao.in TEST/ref_bao.out
+./wl-fisher.x TEST/ref_wl_trunc.in TEST/ref_wl_trunc.out
+
+and you can see whether the outputs are consistent with TEST/ref_bao.out_cmh and 
+TEST/ref_wl_trunc.out_cmh. Note that the BAO case is very fast but the WL case has a huge 
+covariance matrix inversion and takes a while (~35 minutes on my laptop). The outputs are FoMSWG 
+format matrices (Albrecht et al. 2009).
+
+The files nr_utils.* are (slight modifications of) the public domain Numerical Recipes codes. The 
+repository does not contain any copyrighted code.
+
+=== BAO ===
+
+The BAO input files are of the form
+
+38 0.04848 0.001
+1.000   0.025   1.500   8.68E-04        0.500
+...
+2.850   0.028   2.425   4.08E-06        0.500
+
+The format is:
+
+First line: # z bins; fsky; sigma(z)/(1+z)
+
+Each following line is for one z bin (so in this example there should be 38 following bins). The 
+format is: redshift z; full bin width delta z = zmax-zmin; galaxy bias b; number density n (in 
+Mpc^-3, **no h**); and reconstruction floor (usually 0.5, set to 1.0 to turn off reconstruction). 
+[Note that the actual amount of reconstruction is set by combining the floor with the linear theory 
+prediction for how well the displacements can be determined given the level of shot noise in the 
+data.]
+
+The code prints to the terminal a table of results:
+
+1.000  4.37294e+08  4.83232e+00 0.040531 0.081149  0.40858 0.028733
+...
+2.850  7.13765e+08  1.73254e-02 0.908071 1.211188  0.41518 0.558912
+
+Here the columns are: z; the volume V in that redshift slice (in Mpc^3, **no h**); nP at 
+k=0.2h/Mpc,mu=0 (note this is *with h* for consistency with common convention); sigma(D)/D; 
+sigma(H)/H; the correlation coefficient of D and H (usually ~0.4 for galaxies); and sigma(s)/s 
+(total scale, i.e. best constrained combination of D and 1/H).
+
+=== Weak Lensing ===
+
+The weak lensing input files are of the form
+
+15 12 12.68 0.475 0.04848
+0.10	1.643E-09	1.00E-05	1.00E-05
+...
+2.90	3.047E-08	1.00E-05	1.00E-05
+
+The format is:
+
+First line: # z bins; # l bins; first l; delta ln l; fsky
+
+Each following line is for one z bin (so in this example there should be 15 following bins). The 
+format is: z_src for that bin; noise (sigma_gamma^2/nbar, in units of sr^-1); mean photo-z 
+uncertainty in that bin; shear calibration uncertainty in that bin.
+
+There are a few options for intrinsic alignment marginalization in the get_wl_fisher function.
